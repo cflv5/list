@@ -47,16 +47,28 @@ struct list *list_create();
  * Assigns null to the referenced list
  *
  * @param list address of a list pointer
+ * @return 0 if successful, positive for error codes, negative for warnings
  */
-void list_delete(struct list **list);
+int list_delete(struct list **list);
 
 /**
  * @brief Deletes list and its items,
  * assigns null to the referenced list
  *
  * @param list address of a list pointer
+ * @return 0 if successful, positive for error codes, negative for warnings
  */
-void list_delete_dynamic(struct list **list);
+int list_delete_dynamic(struct list **list);
+
+/**
+ * @brief Deletes list and its items,
+ * assigns null to the referenced list
+ *
+ * @param list address of a list pointer
+ * @param deallocator consumer function to be applied on per items when deleting
+ * @return 0 if successful, positive for error codes, negative for warnings
+ */
+int list_delete_dynamic_by(struct list **list, list_consumer *deallocator);
 
 /**
  * @brief Adds an item to the list after the element on which
