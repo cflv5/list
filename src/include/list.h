@@ -77,10 +77,20 @@ int list_delete_dynamic_by(struct list **list, list_consumer *deallocator);
  * @param list address of a list pointer
  * @param item address of the item
  * @param predicate predicate to be evaluated
- * @param options TODO: flag to
  * @return 0 if successful, positive for error codes, negative for warnings
  */
-int list_add(struct list *list, void *item, list_predicate *predicate, short options);
+int list_add_after(struct list *list, void *item, list_predicate *predicate);
+
+/**
+ * @brief Adds an item to the list before the element on which
+ * predicate evaluated true
+ *
+ * @param list address of a list pointer
+ * @param item address of the item
+ * @param predicate predicate to be evaluated
+ * @return 0 if successful, positive for error codes, negative for warnings
+ */
+int list_add_before(struct list *list, void *item, list_predicate *predicate);
 
 /**
  * @brief Adds an item to the end of the list
