@@ -14,6 +14,9 @@
 #include <pthread.h>
 #include <stdlib.h>
 
+#define ADD_BEFORE_INDICATOR 1
+#define ADD_AFTER_INDICATOR 2
+
 struct list_node
 {
     void *item;
@@ -113,6 +116,16 @@ int list_foreach(struct list *list, list_consumer *consumer)
     return LIST_OK;
 }
 
+int list_add_after(struct list *list, void *item, list_predicate *predicate)
+{
+    return add_item_to_list_generic(list, item, predicate, ADD_AFTER_INDICATOR);
+}
+
+int list_add_before(struct list *list, void *item, list_predicate *predicate)
+{
+    return add_item_to_list_generic(list, item, predicate, ADD_BEFORE_INDICATOR);
+}
+
 // static function definitions
 
 /**
@@ -156,4 +169,54 @@ static void delete_nodes(struct list *list)
         curr = curr->next;
     }
     list->list = NULL;
+}
+
+/**
+ * @brief 
+ * 
+ * @param list list to add item
+ * @param item item that is wanted to be added
+ * @param predicate predicate function to decide item index
+ * @param position wheter item is position before or after the predicate index
+ * 
+ * @return int 
+ */
+static int add_item_to_list_generic(struct list *list, void *item, list_predicate *predicate, int position)
+{
+    struct list_node *node;
+    struct list_node *curr;
+    int cont_f = 1;
+    
+    if (list == NULL)
+    {
+        return ERROR_NULL_POINTER;
+    }
+
+    pthread_mutex_lock(&list->lock);
+    node = (struct list_node *)malloc(sizeof(struct list_node));
+    node->item = item;
+    node->next = NULL;
+    node->prev = NULL;
+
+    curr = list->list;
+    while (curr != NULL && cont_f)
+    {
+        if (predicate(curr->item))
+        {
+            cont_f = 0;
+        }
+
+        curr = curr->next;
+    }
+
+    if (curr == NULL)
+    {
+        return ERROR_PREDICATE_FAILED;
+    }
+
+    node->next = curr->next;
+    curr->next = node;
+    node->prev = curr;
+
+    return LIST_OK;
 }
