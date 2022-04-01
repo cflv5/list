@@ -172,21 +172,21 @@ static void delete_nodes(struct list *list)
 }
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param list list to add item
  * @param item item that is wanted to be added
  * @param predicate predicate function to decide item index
  * @param position wheter item is position before or after the predicate index
- * 
- * @return int 
+ *
+ * @return int result of the operation
  */
 static int add_item_to_list_generic(struct list *list, void *item, list_predicate *predicate, int position)
 {
     struct list_node *node;
     struct list_node *curr;
     int cont_f = 1;
-    
+
     if (list == NULL)
     {
         return ERROR_NULL_POINTER;
@@ -211,12 +211,28 @@ static int add_item_to_list_generic(struct list *list, void *item, list_predicat
 
     if (curr == NULL)
     {
+        pthread_mutex_unlock(&list->lock);
         return ERROR_PREDICATE_FAILED;
     }
 
-    node->next = curr->next;
-    curr->next = node;
-    node->prev = curr;
+    if (position == ADD_BEFORE_INDICATOR)
+    {
+        node->next = curr->next;
+        curr->next = node;
+        node->prev = curr;
+    }
+    else if (position == ADD_AFTER_INDICATOR)
+    {
+        node->next = curr;
+        node->prev = curr->prev;
+        curr->prev = node;
+    }
+    else
+    {
+        pthread_mutex_unlock(&list->lock);
+        return ERROR_POSITION_INDICATOR;
+    }
 
+    pthread_mutex_unlock(&list->lock);
     return LIST_OK;
 }
